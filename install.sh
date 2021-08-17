@@ -100,7 +100,7 @@ read -p "Press enter to continue"
 fi
 
 if whiptail --yesno "Clone the Baton Repo?" 20 60 ;then
-cd ~
+cd /home/pi
 git clone git@github.com:Birmingham-Open-Media/Baton.git
 cd Baton
 pip3 install -r requirements.txt
