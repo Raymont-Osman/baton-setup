@@ -4,9 +4,9 @@ Script to set up and maintain the raspberry pi correctly on the baton.
 
 ## Pre install
 
-We're setting up the pi with the official Raspberry pi Imager.
+We've set up the boards with the official Raspberry pi Imager.
 [https://www.raspberrypi.org/software/](https://www.raspberrypi.org/software/)
-There is a hidden menu in this application that makes setting up the image for headless ssh much easier. Use cmd + shift + x to open this panel and set the network and ssh parameters. Once the images is installed, ssh into the pi and run the install script below which will continue to add all the software and code ready for use.
+There's a hidden menu ```cmd + shift + x``` in this application that makes setting up for headless ssh much easier by giving each image an individual hostname. Once the images is installed, ssh into the pi and run the one line install script below which will continue to add all the software and code ready for use.
 
 ## Install script
 
