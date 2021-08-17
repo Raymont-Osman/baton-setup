@@ -2,11 +2,17 @@
 #========================
 set -u
 
+#
+# Function to Abort the script
+#
 abort() {
   printf "%s\n" "$@"
   exit 1
 }
 
+#
+# Check the version of Bash
+#
 if [ -z "${BASH_VERSION:-}" ]; then
   abort "Bash is required to interpret this script."
 fi
@@ -17,7 +23,7 @@ if [[ ! -t 0 || -n "${CI-}" ]]; then
   NONINTERACTIVE=1
 fi
 
-# First check OS.
+# Check the OS. Prevents accidentally knackering a macbook.
 OS="$(uname)"
 if [[ "$OS" == "Linux" ]]; then
   HOMEBREW_ON_LINUX=1
@@ -25,6 +31,15 @@ else
   abort "Baton is only supported on Linux."
 fi
 
+#
+# Show a welcome message box
+#
+whiptail --msgbox "Welcome to the baton setup script. This script will now ask for your sudo password." --title "Baton Setup Script" 20 60
+
+
+#
+# Function to check and asked for sudo access
+#
 have_sudo_access() {
   local -a args
   if [[ -n "${SUDO_ASKPASS-}" ]]; then
@@ -54,33 +69,37 @@ have_sudo_access() {
   return "$HAVE_SUDO_ACCESS"
 }
 
-#======================== SCRIPT START ========================#
-
-whiptail --msgbox "Welcome to the baton setup script. This script will now ask for your sudo password." --title "Baton Setup Script" 20 60
-
+#
+# Check for Sudo access
+#
 have_sudo_access
-
-# update the system
+#
+# Ask to update the system
+#
 if whiptail --yesno "Update and Upgrade Raspbian?" 20 60 ;then
 sudo apt-get --yes update
 sudo apt-get --yes upgrade
 sudo apt --yes autoremove
 fi
-
-# install software
-if whiptail --yesno "Install the latest packages?" 20 60 ;then
+#
+# Ask to install the base software packages
+#
+if whiptail --yesno "Install the latest packages? (takes a while)" 20 60 ;then
 sudo apt-get --yes install vim pijuice-base libglib2.0-dev
 fi
-
+#
+# Ask whether to configure the PiJuice battery management
 # https://github.com/PiSupply/PiJuice
+#
 if whiptail --yesno "Setup the Pi Juice?" 20 60 ;then
 pijuice_cli
 fi
-
-# Set up the SSH key for the private GitHub repository.
+#
+# Ask to set up an SSH key for private GitHub repository access.
+# More details can be found here:
 # https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+#
 if whiptail --yesno "Setup SSH key for private Github?" 20 60 ;then
-
 # setup ssh keygen
 EMAIL=$(whiptail --inputbox "Enter your github email" 8 39 --title "Github Email" 3>&1 1>&2 2>&3)
 ssh-keygen -t ed25519 -C "$EMAIL"
@@ -92,7 +111,6 @@ Host *
   AddKeysToAgent yes
   IdentityFile ~/.ssh/id_ed25519
 END
-
 # Add Github public key
 echo "Copy this file to github"
 echo "Open https://github.com/settings/keys and add this key..."
@@ -102,6 +120,9 @@ echo ""
 read -p "Press enter to continue"
 fi
 
+#
+# Ask to clone the baton repo (assumes the private key is now active)
+#
 if whiptail --yesno "Clone the Baton Repo?" 20 60 ;then
 cd /home/pi
 rm -rf Baton
@@ -110,6 +131,35 @@ cd Baton
 pip3 install -r requirements.txt
 fi
 
+#
+# Ask to setup Supervisor (assumes the repo is now cloned)
+# 
+if whiptail --yesno "Set up Supervisor?" 20 60 ;then
+sudo apt-get --yes install supervisor
+tee -a /etc/supervisor/conf.d/baton.conf << END
+[program:baton]
+command=/usr/bin/python3 -u /home/pi/Baton/Baton.py -l info
+directory=/home/pi/Baton
+autostart=true
+autorestart=true
+startretries=3
+stderr_logfile=/var/log/baton.err.log
+stdout_logfile=/var/log/baton.out.log
+END
+sudo tee -a /etc/supervisor/conf.d/server.conf << END
+[inet_http_server]
+port = *:9001
+username = batonuser
+password = batonpass
+END
+echo "Starting Supervisor..."
+sudo service supervisor start
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl pid all
+fi
+
+# Ask to set up the power saving modifications
 # https://learn.pi-supply.com/make/how-to-save-power-on-your-raspberry-pi/
 # if you are running your Raspberry Pi headless or using SSH for remote access then chances
 # are you are not using the HDMI port connecting to a monitor. However, even though you do not
@@ -128,9 +178,10 @@ sudo /opt/vc/bin/tvservice -o
 # echo "dtparam=act_led_activelow=on" >> /boot/config.txt
 fi
 
-# setup multiple networks
+# @todo: setup multiple wifi networks
 # https://mikestreety.medium.com/use-a-raspberry-pi-with-multiple-wifi-networks-2eda2d39fdd6
 # vim /etc/network/interfaces
 # vim /etc/wpa_supplicant/wpa_supplicant.conf
 
-whiptail --msgbox "Done" --title "Baton Setup Script" 20 60
+# Nice goodbye
+whiptail --msgbox "Setup Done! Have fun." --title "Baton Setup Script" 20 60
