@@ -113,8 +113,8 @@ have_sudo_access
 
 # update the system
 ohai "Updating and Upgrading"
-apt-get --yes update
-apt-get --yes upgrade
+sudo apt-get --yes update
+sudo apt-get --yes upgrade
 
 # install software
 ohai "Installing Software"
