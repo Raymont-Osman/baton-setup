@@ -7,6 +7,17 @@ abort() {
   exit 1
 }
 
+wait_for_user() {
+  local c
+  echo
+  echo "Press RETURN to continue"
+  getc c
+  # we test for \r and \n because some stuff does \r instead
+  if ! [[ "$c" == $'\r' || "$c" == $'\n' ]]; then
+    exit 1
+  fi
+}
+
 if [ -z "${BASH_VERSION:-}" ]; then
   abort "Bash is required to interpret this script."
 fi
@@ -89,8 +100,12 @@ Host *
   IdentityFile ~/.ssh/id_ed25519
 END
 
-  # Add Github public key
-  whiptail --msgbox "$(cat ~/.ssh/id_ed25519.pub)" 20 60
+# Add Github public key
+echo "Copy file...."
+echo ""
+cat ~/.ssh/id_ed25519.pub
+echo ""
+wait_for_user
 fi
 
 if whiptail --yesno "Clone the Repo?" 20 60 ;then
