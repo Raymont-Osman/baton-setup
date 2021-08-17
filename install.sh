@@ -70,22 +70,24 @@ have_sudo_access() {
 have_sudo_access
 
 # update the system
-if whiptail --yesno "Update and Upgrade the system?" 20 60 ;then
+if whiptail --yesno "Update and Upgrade Raspbian?" 20 60 ;then
   sudo apt-get --yes update
   sudo apt-get --yes upgrade
 fi
 
 # install software
-if whiptail --yesno "Install the latest software?" 20 60 ;then
+if whiptail --yesno "Install the latest packages?" 20 60 ;then
   sudo apt-get --yes install vim pijuice-base
 fi
 
 # https://github.com/PiSupply/PiJuice
+if whiptail --yesno "Setup the Pi Juice?" 20 60 ;then
 pijuice_cli
+fi
 
 # Git clone
 # https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
-if whiptail --yesno "Setup SSH key?" 20 60 ;then
+if whiptail --yesno "Setup SSH key for private Github?" 20 60 ;then
 
   # setup ssh keygen
   EMAIL=$(whiptail --inputbox "Enter your github email" 8 39 --title "Github Email" 3>&1 1>&2 2>&3)
@@ -108,7 +110,7 @@ echo ""
 wait_for_user
 fi
 
-if whiptail --yesno "Clone the Repo?" 20 60 ;then
+if whiptail --yesno "Clone the Baton Repo?" 20 60 ;then
 git clone git@github.com:Birmingham-Open-Media/Baton.git
 fi
 
