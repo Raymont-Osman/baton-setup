@@ -18,65 +18,12 @@ if [[ ! -t 0 || -n "${CI-}" ]]; then
 fi
 
 # First check OS.
-# OS="$(uname)"
-# if [[ "$OS" == "Linux" ]]; then
-#   HOMEBREW_ON_LINUX=1
-# else
-#   abort "Baton is only supported on Linux."
-# fi
-
-# string formatters
-if [[ -t 1 ]]; then
-  tty_escape() { printf "\033[%sm" "$1"; }
+OS="$(uname)"
+if [[ "$OS" == "Linux" ]]; then
+  HOMEBREW_ON_LINUX=1
 else
-  tty_escape() { :; }
+  abort "Baton is only supported on Linux."
 fi
-tty_mkbold() { tty_escape "1;$1"; }
-tty_underline="$(tty_escape "4;39")"
-tty_blue="$(tty_mkbold 34)"
-tty_red="$(tty_mkbold 31)"
-tty_bold="$(tty_mkbold 39)"
-tty_reset="$(tty_escape 0)"
-
-shell_join() {
-  local arg
-  printf "%s" "$1"
-  shift
-  for arg in "$@"; do
-    printf " "
-    printf "%s" "${arg// /\ }"
-  done
-}
-
-ring_bell() {
-  # Use the shell's audible bell.
-  if [[ -t 1 ]]; then
-    printf "\a"
-  fi
-}
-
-ohai() {
-  printf "${tty_blue}==>${tty_bold} %s${tty_reset}\n" "$(shell_join "$@")"
-}
-
-getc() {
-  local save_state
-  save_state=$(/bin/stty -g)
-  /bin/stty raw -echo
-  IFS= read -r -n 1 -d '' "$@"
-  /bin/stty "$save_state"
-}
-
-wait_for_user() {
-  local c
-  echo
-  echo "Press RETURN to continue or any other key to abort"
-  getc c
-  # we test for \r and \n because some stuff does \r instead
-  if ! [[ "$c" == $'\r' || "$c" == $'\n' ]]; then
-    exit 1
-  fi
-}
 
 have_sudo_access() {
   local -a args
@@ -113,14 +60,12 @@ have_sudo_access
 
 # update the system
 if whiptail --yesno "Update and Upgrade the system?" 20 60 ;then
-  ohai "Updating and Upgrading"
   sudo apt-get --yes update
   sudo apt-get --yes upgrade
 fi
 
 # install software
 if whiptail --yesno "Install the latest software?" 20 60 ;then
-  ohai "Installing Software"
   sudo apt-get --yes install vim pijuice-base
 fi
 
@@ -128,20 +73,14 @@ fi
 pijuice_cli
 
 # Git clone
+# https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 if whiptail --yesno "Setup SSH key?" 20 60 ;then
 
-# https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
-# soluions
-# 1: public
-# 2: local network pull
-# 3: public release
-# 4: new github user with ssh key
-
-# setup ssh keygen
-read -p "Enter email: " EMAIL
-ssh-keygen -t ed25519 -C "$EMAIL"
-eval "$(ssh-agent -s)"
-touch ~/.ssh/config
+  # setup ssh keygen
+  EMAIL=$(whiptail --inputbox "Enter your github email" 8 39 --title "Github Email" 3>&1 1>&2 2>&3)
+  ssh-keygen -t ed25519 -C "$EMAIL"
+  eval "$(ssh-agent -s)"
+  touch ~/.ssh/config
 
 # add to file
 tee -a ~/.ssh/config << END
@@ -150,16 +89,12 @@ Host *
   IdentityFile ~/.ssh/id_ed25519
 END
 
-# Add Github public key
-
-ohai "Add the following to Github"
-cat ~/.ssh/id_ed25519.pub
-ohai "END"
+  # Add Github public key
+  whiptail --msgbox "$(cat ~/.ssh/id_ed25519.pub)" 20 60
 fi
 
 if whiptail --yesno "Clone the Repo?" 20 60 ;then
-read -p "Add to github and clone repo: " REPO
-git clone $REPO
+git clone git@github.com:Birmingham-Open-Media/Baton.git
 fi
 
 # https://learn.pi-supply.com/make/how-to-save-power-on-your-raspberry-pi/
@@ -169,27 +104,18 @@ fi
 # when do connect a monitor. Well, it is possible to switch off this output by a simple command. 
 # This can save you up to 30mA in total, which isn’t too much but overall it can make a big
 # difference when combined with other power saving options.
-ohai "Turning off HDMI"
-opt/vc/bin/tvservice -o
-
+if whiptail --yesno "Setup power savings" 20 60 ;then
+sudo /opt/vc/bin/tvservice -o
 # If you really want to save as much power as possible then it
 # is possible to disable the on-board LEDs on the Raspberry Pi.
 # This can be done by editing the /boot/config.txt
 # file and adding the following lines:
-ohai "[INACTIVE] Turning off Power Lights"
-sleep 3
 # echo "# Added by setup script" >> /boot/config.txt
 # echo "dtparam=act_led_trigger=none" >> /boot/config.txt
 # echo "dtparam=act_led_activelow=on" >> /boot/config.txt
+fi
 
 # setup multiple networks
-ohai "[INACTIVE] Set up Wifi Networks"
-sleep 3
 # https://mikestreety.medium.com/use-a-raspberry-pi-with-multiple-wifi-networks-2eda2d39fdd6
 # vim /etc/network/interfaces
 # vim /etc/wpa_supplicant/wpa_supplicant.conf
-
-if [[ -z "${NONINTERACTIVE-}" ]]; then
-  ring_bell
-  wait_for_user
-fi
