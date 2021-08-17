@@ -56,17 +56,19 @@ have_sudo_access() {
 
 #======================== SCRIPT START ========================#
 
+whiptail --msgbox "Welcome to the baton setup script. This script will now ask for your sudo password." --title "Baton Setup Script" 20 60
+
 have_sudo_access
 
 # update the system
 if whiptail --yesno "Update and Upgrade Raspbian?" 20 60 ;then
-  sudo apt-get --yes update
-  sudo apt-get --yes upgrade
+sudo apt-get --yes update
+sudo apt-get --yes upgrade
 fi
 
 # install software
 if whiptail --yesno "Install the latest packages?" 20 60 ;then
-  sudo apt-get --yes install vim pijuice-base
+sudo apt-get --yes install vim pijuice-base libglib2.0-dev
 fi
 
 # https://github.com/PiSupply/PiJuice
@@ -74,17 +76,16 @@ if whiptail --yesno "Setup the Pi Juice?" 20 60 ;then
 pijuice_cli
 fi
 
-# Git clone
+# Set up the SSH key for the private GitHub repository.
 # https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 if whiptail --yesno "Setup SSH key for private Github?" 20 60 ;then
 
-  # setup ssh keygen
-  EMAIL=$(whiptail --inputbox "Enter your github email" 8 39 --title "Github Email" 3>&1 1>&2 2>&3)
-  ssh-keygen -t ed25519 -C "$EMAIL"
-  eval "$(ssh-agent -s)"
-  touch ~/.ssh/config
-
-# add to file
+# setup ssh keygen
+EMAIL=$(whiptail --inputbox "Enter your github email" 8 39 --title "Github Email" 3>&1 1>&2 2>&3)
+ssh-keygen -t ed25519 -C "$EMAIL"
+eval "$(ssh-agent -s)"
+# Add to the ssh config file
+touch ~/.ssh/config
 tee -a ~/.ssh/config << END
 Host *
   AddKeysToAgent yes
@@ -92,8 +93,8 @@ Host *
 END
 
 # Add Github public key
-echo "Copy file...."
-echo ""
+echo "Copy this file to github"
+echo "Open https://github.com/settings/keys and add this key...\n"
 cat ~/.ssh/id_ed25519.pub
 echo ""
 read -p "Press enter to continue"
@@ -128,3 +129,5 @@ fi
 # https://mikestreety.medium.com/use-a-raspberry-pi-with-multiple-wifi-networks-2eda2d39fdd6
 # vim /etc/network/interfaces
 # vim /etc/wpa_supplicant/wpa_supplicant.conf
+
+whiptail --msgbox "Done" --title "Baton Setup Script" 20 60
