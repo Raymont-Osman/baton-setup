@@ -136,7 +136,7 @@ fi
 # 
 if whiptail --yesno "Set up Supervisor?" 20 60 ;then
 sudo apt-get --yes install supervisor
-tee -a /etc/supervisor/conf.d/baton.conf << END
+sudo tee -a /etc/supervisor/conf.d/baton.conf << END
 [program:baton]
 command=/usr/bin/python3 -u /home/pi/Baton/Baton.py -l info
 directory=/home/pi/Baton
