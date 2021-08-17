@@ -118,8 +118,7 @@ sudo apt-get --yes upgrade
 
 # install software
 ohai "Installing Software"
-apt-get --yes install vim pijuice-base nginx
-# google cloud
+sudo apt-get --yes install vim pijuice-base nginx
 
 # https://github.com/PiSupply/PiJuice
 pijuice_cli
