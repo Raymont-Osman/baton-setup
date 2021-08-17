@@ -7,17 +7,6 @@ abort() {
   exit 1
 }
 
-wait_for_user() {
-  local c
-  echo
-  echo "Press RETURN to continue"
-  getc c
-  # we test for \r and \n because some stuff does \r instead
-  if ! [[ "$c" == $'\r' || "$c" == $'\n' ]]; then
-    exit 1
-  fi
-}
-
 if [ -z "${BASH_VERSION:-}" ]; then
   abort "Bash is required to interpret this script."
 fi
@@ -107,7 +96,7 @@ echo "Copy file...."
 echo ""
 cat ~/.ssh/id_ed25519.pub
 echo ""
-wait_for_user
+read -p "Press enter to continue"
 fi
 
 if whiptail --yesno "Clone the Baton Repo?" 20 60 ;then
