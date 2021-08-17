@@ -112,19 +112,23 @@ have_sudo_access() {
 have_sudo_access
 
 # update the system
-ohai "Updating and Upgrading"
-sudo apt-get --yes update
-sudo apt-get --yes upgrade
+if whiptail --yesno "Update and Upgrade the system?" 20 60 ;then
+  ohai "Updating and Upgrading"
+  sudo apt-get --yes update
+  sudo apt-get --yes upgrade
+fi
 
 # install software
-ohai "Installing Software"
-sudo apt-get --yes install vim pijuice-base
+if whiptail --yesno "Install the latest software?" 20 60 ;then
+  ohai "Installing Software"
+  sudo apt-get --yes install vim pijuice-base
+fi
 
 # https://github.com/PiSupply/PiJuice
 pijuice_cli
 
 # Git clone
-ohai "Cloning the Repository"
+if whiptail --yesno "Setup SSH key?" 20 60 ;then
 
 # https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
 # soluions
@@ -151,9 +155,12 @@ END
 ohai "Add the following to Github"
 cat ~/.ssh/id_ed25519.pub
 ohai "END"
+fi
 
+if whiptail --yesno "Clone the Repo?" 20 60 ;then
 read -p "Add to github and clone repo: " REPO
 git clone $REPO
+fi
 
 # https://learn.pi-supply.com/make/how-to-save-power-on-your-raspberry-pi/
 # if you are running your Raspberry Pi headless or using SSH for remote access then chances
