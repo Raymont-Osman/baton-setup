@@ -118,7 +118,7 @@ sudo apt-get --yes upgrade
 
 # install software
 ohai "Installing Software"
-sudo apt-get --yes install vim pijuice-base nginx
+sudo apt-get --yes install vim pijuice-base
 
 # https://github.com/PiSupply/PiJuice
 pijuice_cli
