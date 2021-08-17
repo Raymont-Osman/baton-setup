@@ -64,6 +64,7 @@ have_sudo_access
 if whiptail --yesno "Update and Upgrade Raspbian?" 20 60 ;then
 sudo apt-get --yes update
 sudo apt-get --yes upgrade
+sudo apt --yes autoremove
 fi
 
 # install software
@@ -94,7 +95,8 @@ END
 
 # Add Github public key
 echo "Copy this file to github"
-echo "Open https://github.com/settings/keys and add this key...\n"
+echo "Open https://github.com/settings/keys and add this key..."
+echo ""
 cat ~/.ssh/id_ed25519.pub
 echo ""
 read -p "Press enter to continue"
@@ -102,6 +104,7 @@ fi
 
 if whiptail --yesno "Clone the Baton Repo?" 20 60 ;then
 cd /home/pi
+rm -rf Baton
 git clone git@github.com:Birmingham-Open-Media/Baton.git
 cd Baton
 pip3 install -r requirements.txt
