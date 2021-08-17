@@ -100,7 +100,10 @@ read -p "Press enter to continue"
 fi
 
 if whiptail --yesno "Clone the Baton Repo?" 20 60 ;then
+cd ~
 git clone git@github.com:Birmingham-Open-Media/Baton.git
+cd Baton
+pip3 install -r requirements.txt
 fi
 
 # https://learn.pi-supply.com/make/how-to-save-power-on-your-raspberry-pi/
