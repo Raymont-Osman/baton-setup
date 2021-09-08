@@ -132,6 +132,12 @@ sudo pip3 install -r requirements.txt
 fi
 
 #
+# Set up tiny cloud
+if whiptail --yesno "Set up TinyCloud?" 20 60 ;then
+python /home/pi/Baton/tinycloud/register.py
+fi
+
+#
 # Ask to setup Supervisor (assumes the repo is now cloned)
 # 
 if whiptail --yesno "Set up Supervisor?" 20 60 ;then
