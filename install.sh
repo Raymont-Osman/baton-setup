@@ -128,7 +128,7 @@ cd /home/pi
 rm -rf Baton
 git clone git@github.com:Birmingham-Open-Media/Baton.git
 cd Baton
-pip3 install -r requirements.txt
+sudo pip3 install -r requirements.txt
 fi
 
 #
