@@ -165,21 +165,6 @@ sudo supervisorctl pid all
 fi
 
 
-if whiptail --yesno "Set up Shutdown Script?" 20 60 ;then
-sudo tee -a /usr/lib/systemd/system/baton-shutdown.service << END
-[Unit]
-Description=Baton Shutdown Service
-DefaultDependencies=no
-Before=shutdown.target reboot.target halt.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/python3 /home/pi/Baton/additional/Shutdown.py
-END
-sudo systemctl daemon-reload
-sudo systemctl enable baton-shutdown.service --now
-fi
-
 # Ask to set up the power saving modifications
 # https://learn.pi-supply.com/make/how-to-save-power-on-your-raspberry-pi/
 # if you are running your Raspberry Pi headless or using SSH for remote access then chances
@@ -209,9 +194,9 @@ fi
 # https://github.com/PiSupply/PiJuice
 #
 if whiptail --yesno "Setup the Pi Juice?" 20 60 ;then
-# cat /var/lib/pijuice/pijuice_config.JSON
+
 # reboot
-whiptail --msgbox "You should manually upgrade the firmware." --title "PiJuice Setup" 20 60
+whiptail --msgbox "1) You should manually upgrade the firmware. 2) Sw2 set power on and off" --title "PiJuice Setup" 20 60
 pijuice_cli
 sudo systemctl enable pijuice.service
 sudo systemctl start pijuice.service
