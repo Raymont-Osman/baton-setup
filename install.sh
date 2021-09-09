@@ -85,14 +85,7 @@ fi
 # Ask to install the base software packages
 #
 if whiptail --yesno "Install the latest packages? (takes a while)" 20 60 ;then
-sudo apt-get --yes install vim pijuice-base libglib2.0-dev
-fi
-#
-# Ask whether to configure the PiJuice battery management
-# https://github.com/PiSupply/PiJuice
-#
-if whiptail --yesno "Setup the Pi Juice?" 20 60 ;then
-pijuice_cli
+sudo apt-get --yes install vim pijuice-base libglib2.0-dev supervisor
 fi
 #
 # Ask to set up an SSH key for private GitHub repository access.
@@ -133,15 +126,19 @@ fi
 
 #
 # Set up tiny cloud
-if whiptail --yesno "Set up TinyCloud?" 20 60 ;then
+if whiptail --yesno "Set up TinyCloud PIN?" 20 60 ;then
 python /home/pi/Baton/tinycloud/register.py
+fi
+
+# enabale spi
+if whiptail --yesno "Enable SPI through Raspi Config?" 20 60 ;then
+sudo raspi-config
 fi
 
 #
 # Ask to setup Supervisor (assumes the repo is now cloned)
 # 
 if whiptail --yesno "Set up Supervisor?" 20 60 ;then
-sudo apt-get --yes install supervisor
 sudo tee -a /etc/supervisor/conf.d/baton.conf << END
 [program:baton]
 command=/usr/bin/python3 -u /home/pi/Baton/Baton.py -l info
@@ -163,6 +160,22 @@ sudo service supervisor start
 sudo supervisorctl reread
 sudo supervisorctl update
 sudo supervisorctl pid all
+fi
+
+
+if whiptail --yesno "Set up Shutdown Script?" 20 60 ;then
+sudo tee -a /usr/lib/systemd/baton-shutdown.service << END
+[Unit]
+Description=Baton Shutdown Service
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /home/pi/Baton/additional/Shutdown.py
+END
+sudo systemctl daemon-reload
+sudo systemctl enable baton-shutdown.service --now
 fi
 
 # Ask to set up the power saving modifications
@@ -188,6 +201,17 @@ fi
 # https://mikestreety.medium.com/use-a-raspberry-pi-with-multiple-wifi-networks-2eda2d39fdd6
 # vim /etc/network/interfaces
 # vim /etc/wpa_supplicant/wpa_supplicant.conf
+
+#
+# Ask whether to configure the PiJuice battery management
+# https://github.com/PiSupply/PiJuice
+#
+if whiptail --yesno "Setup the Pi Juice?" 20 60 ;then
+# cat /var/lib/pijuice/pijuice_config.JSON
+# reboot
+whiptail --msgbox "You should manually upgrade the firmware." --title "PiJuice Setup" 20 60
+pijuice_cli
+fi
 
 # Nice goodbye
 whiptail --msgbox "Setup Done! Have fun." --title "Baton Setup Script" 20 60
