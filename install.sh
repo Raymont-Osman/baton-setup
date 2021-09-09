@@ -146,6 +146,8 @@ directory=/home/pi/Baton
 autostart=true
 autorestart=true
 startretries=3
+stopsignal=TERM
+stopwaitsecs=7
 stderr_logfile=/var/log/baton.err.log
 stdout_logfile=/var/log/baton.out.log
 END
@@ -164,7 +166,7 @@ fi
 
 
 if whiptail --yesno "Set up Shutdown Script?" 20 60 ;then
-sudo tee -a /usr/lib/systemd/baton-shutdown.service << END
+sudo tee -a /usr/lib/systemd/system/baton-shutdown.service << END
 [Unit]
 Description=Baton Shutdown Service
 DefaultDependencies=no
@@ -211,6 +213,9 @@ if whiptail --yesno "Setup the Pi Juice?" 20 60 ;then
 # reboot
 whiptail --msgbox "You should manually upgrade the firmware." --title "PiJuice Setup" 20 60
 pijuice_cli
+sudo systemctl enable pijuice.service
+sudo systemctl start pijuice.service
+ps ax | grep pijuice_sys | grep -v grep
 fi
 
 # Nice goodbye
