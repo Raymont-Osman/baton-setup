@@ -139,7 +139,7 @@ fi
 # Ask to setup Supervisor (assumes the repo is now cloned)
 # 
 if whiptail --yesno "Set up Supervisor?" 20 60 ;then
-sudo tee -a /etc/supervisor/conf.d/baton.conf << END
+sudo tee /etc/supervisor/conf.d/baton.conf << END
 [program:baton]
 command=/usr/bin/python3 -u /home/pi/Baton/Baton.py -l info
 directory=/home/pi/Baton
@@ -151,7 +151,7 @@ stopwaitsecs=7
 stderr_logfile=/var/log/baton.err.log
 stdout_logfile=/var/log/baton.out.log
 END
-sudo tee -a /etc/supervisor/conf.d/server.conf << END
+sudo tee /etc/supervisor/conf.d/server.conf << END
 [inet_http_server]
 port = *:9001
 username = batonuser
