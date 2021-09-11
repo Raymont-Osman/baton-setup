@@ -177,10 +177,30 @@ if whiptail --yesno "Setup power savings" 20 60 ;then
 sudo /opt/vc/bin/tvservice -o
 fi
 
-# @todo: setup multiple wifi networks
+# @note, you'll need the PSKs for each network
 # https://mikestreety.medium.com/use-a-raspberry-pi-with-multiple-wifi-networks-2eda2d39fdd6
-# vim /etc/network/interfaces
-# vim /etc/wpa_supplicant/wpa_supplicant.conf
+if whiptail --yesno "Setup multiple WIFI networks?" 20 60 ;then
+read -p "Enter PSK for Fish: " PSK_FISH
+read -p "Enter PSK for CWG_B_HUB: " PSK_CWG_B_HUB
+sudo tee /etc/wpa_supplicant/wpa_supplicant.conf << END
+country=GB
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+ap_scan=1
+
+update_config=1
+network={
+    id_str="Fish"
+    ssid="Fish"
+    psk=${PSK_FISH}
+}
+
+network={
+    id_str="CWG_B_HUB"
+    ssid="CWG_B_HUB"
+    psk=${PSK_CWG_B_HUB}
+}
+END
+fi
 
 #
 # Ask whether to configure the PiJuice battery management
