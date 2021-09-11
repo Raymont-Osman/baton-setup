@@ -4,5 +4,5 @@
 #==================================
 cd /home/pi/Baton
 git pull
-echo "pip 3 installing requirements"
+git checkout v1.x
 sudo pip3 install -r requirements.txt

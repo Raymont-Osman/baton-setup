@@ -36,7 +36,6 @@ fi
 #
 whiptail --msgbox "Welcome to the baton setup script. This script will now ask for your sudo password." --title "Baton Setup Script" 20 60
 
-
 #
 # Function to check and asked for sudo access
 #
@@ -121,6 +120,7 @@ cd /home/pi
 rm -rf Baton
 git clone git@github.com:Birmingham-Open-Media/Baton.git
 cd Baton
+git checkout v1.x
 sudo pip3 install -r requirements.txt
 fi
 
@@ -175,13 +175,6 @@ fi
 # difference when combined with other power saving options.
 if whiptail --yesno "Setup power savings" 20 60 ;then
 sudo /opt/vc/bin/tvservice -o
-# If you really want to save as much power as possible then it
-# is possible to disable the on-board LEDs on the Raspberry Pi.
-# This can be done by editing the /boot/config.txt
-# file and adding the following lines:
-# echo "# Added by setup script" >> /boot/config.txt
-# echo "dtparam=act_led_trigger=none" >> /boot/config.txt
-# echo "dtparam=act_led_activelow=on" >> /boot/config.txt
 fi
 
 # @todo: setup multiple wifi networks
@@ -194,8 +187,6 @@ fi
 # https://github.com/PiSupply/PiJuice
 #
 if whiptail --yesno "Setup the Pi Juice?" 20 60 ;then
-
-# reboot
 whiptail --msgbox "1) You should manually upgrade the firmware. 2) Sw2 set power on and off" --title "PiJuice Setup" 20 60
 pijuice_cli
 sudo systemctl enable pijuice.service
