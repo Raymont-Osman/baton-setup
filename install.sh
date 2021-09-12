@@ -202,6 +202,31 @@ network={
 END
 fi
 
+if whiptail --yesno "Setup the SSH Tunnel Service?" 20 60 ;then
+
+whiptail --msgbox "You must also copy the BatonHub.pem file to /home/pi/.ssh and update /home/pi/authorized_keys with the server's public key" --title "SSH Key Notice" 20 60
+
+read -p "Enter the remote port [23233]: " REMOTE_PORT
+REMOTE_PORT=${REMOTE_PORT:-23233}
+sudo tee /etc/systemd/system/sshtunnel.service << END
+[Unit]
+Description=SSH Tunnel
+After=network.target
+
+[Service]
+Restart=always
+RestartSec=180
+User=pi
+ExecStart=/bin/ssh -NT -o ServerAliveInterval=60 -i /home/pi/.ssh/BatonHub.pem -p 23232 -R ${REMOTE_PORT}:localhost:22 ubuntu@52.210.249.162
+
+[Install]
+WantedBy=multi-user.target
+END
+
+sudo systemctl enable sshtunnel
+sudo systemctl start sshtunnel
+fi
+
 #
 # Ask whether to configure the PiJuice battery management
 # https://github.com/PiSupply/PiJuice
