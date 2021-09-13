@@ -132,7 +132,9 @@ fi
 
 # enabale spi
 if whiptail --yesno "Enable SPI through Raspi Config?" 20 60 ;then
-sudo raspi-config
+# sudo raspi-config
+sudo raspi-config nonint do_i2c 0
+sudo raspi-config nonint do_spi 0
 fi
 
 #
@@ -237,6 +239,22 @@ pijuice_cli
 sudo systemctl enable pijuice.service
 sudo systemctl start pijuice.service
 ps ax | grep pijuice_sys | grep -v grep
+fi
+
+if whiptail --yesno "Setup the Pi Juice RTC?" 20 60 ;then
+i2cdetect -y 1
+read -p "0x68 Should be UU. If not press Y to update Boot Config:" SHOULD_UPDATE
+if [ "$SHOULD_UPDATE" == "Y" ]; then
+sudo tee -a /boot/config.txt << END
+
+# Enable system to control the pijuice zero RTC
+dtoverlay=i2c-rtc,ds1339
+END
+sudo hwclock -r
+else
+echo "Skipped Boot Update"
+sudo hwclock -r
+fi
 fi
 
 # Nice goodbye
