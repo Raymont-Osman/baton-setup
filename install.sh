@@ -127,7 +127,7 @@ fi
 #
 # Set up tiny cloud
 if whiptail --yesno "Set up TinyCloud PIN?" 20 60 ;then
-python /home/pi/Baton/tinycloud/register.py
+python3 /home/pi/Baton/tinycloud/register.py
 fi
 
 # enabale spi
@@ -201,6 +201,21 @@ network={
     ssid="CWG_B_HUB"
     psk=${PSK_CWG_B_HUB}
 }
+END
+fi
+
+if whiptail --yesno "Setup Fast Start LEDs" 20 60 ;then
+sudo tee /etc/systemd/system/welcome.service << END
+[Unit]
+Description=Fast Boot LED Light Service
+DefaultDependencies=no
+
+[Service]
+Type=simple
+ExecStart=sudo python3 /home/pi/Baton/welcome.py
+
+[Install]
+WantedBy=sysinit.target
 END
 fi
 
