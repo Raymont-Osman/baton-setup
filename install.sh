@@ -206,7 +206,7 @@ fi
 
 if whiptail --yesno "Setup the SSH Tunnel Service?" 20 60 ;then
 
-whiptail --msgbox "You must also copy the BatonHub.pem file to /home/pi/.ssh and update /home/pi/authorized_keys with the server's public key" --title "SSH Key Notice" 20 60
+whiptail --msgbox "First, you must also copy the BatonHub.pem file to /home/pi/.ssh and update /home/pi/authorized_keys with the server's public key." --title "SSH Key Notice" 20 60
 
 read -p "Enter the remote port [23233]: " REMOTE_PORT
 REMOTE_PORT=${REMOTE_PORT:-23233}
@@ -227,6 +227,11 @@ END
 
 sudo systemctl enable sshtunnel
 sudo systemctl start sshtunnel
+
+whiptail --msgbox "We'll now try to connect to the server to check it works." --title "Baton Setup Script" 20 60
+
+/bin/ssh -NT -o ServerAliveInterval=60 -i /home/pi/.ssh/BatonHub.pem -p 23232 -R 23229:localhost:22 ubuntu@52.210.249.162
+
 fi
 
 #
