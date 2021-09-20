@@ -1,4 +1,6 @@
 #!/bin/bash
+# to run copy and paste the following into a terminal
+# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/raymont-osman/baton-setup/HEAD/install.sh)"
 #========================
 set -u
 
@@ -217,6 +219,8 @@ ExecStart=sudo python3 /home/pi/Baton/welcome.py
 [Install]
 WantedBy=sysinit.target
 END
+sudo systemctl enable welcome
+sudo systemctl start welcome
 fi
 
 if whiptail --yesno "Setup the SSH Tunnel Service?" 20 60 ;then
