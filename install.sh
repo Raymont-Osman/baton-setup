@@ -152,8 +152,6 @@ autorestart=true
 startretries=3
 stopsignal=TERM
 stopwaitsecs=7
-stderr_logfile=/var/log/baton.err.log
-stdout_logfile=/var/log/baton.out.log
 END
 sudo tee /etc/supervisor/conf.d/server.conf << END
 [inet_http_server]
@@ -168,6 +166,33 @@ sudo supervisorctl update
 sudo supervisorctl pid all
 fi
 
+
+if whiptail --yesno "Fix Bluetooth Service?" 20 60 ;then
+sudo tee /etc/systemd/system/bluetooth.target.wants/bluetooth.service << END
+[Unit]
+Description=Bluetooth service
+Documentation=man:bluetoothd(8)
+ConditionPathIsDirectory=/sys/class/bluetooth
+
+[Service]
+Type=dbus
+BusName=org.bluez
+ExecStart=/usr/lib/bluetooth/bluetoothd -P battery
+NotifyAccess=main
+#WatchdogSec=10
+#Restart=on-failure
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+LimitNPROC=1
+ProtectHome=true
+ProtectSystem=full
+
+[Install]
+WantedBy=bluetooth.target
+Alias=dbus-org.bluez.service
+END
+sudo systemctl daemon-reload
+sudo systemctl restart bluetooth
+fi
 
 # Ask to set up the power saving modifications
 # https://learn.pi-supply.com/make/how-to-save-power-on-your-raspberry-pi/
@@ -184,7 +209,7 @@ fi
 # @note, you'll need the PSKs for each network
 # https://mikestreety.medium.com/use-a-raspberry-pi-with-multiple-wifi-networks-2eda2d39fdd6
 if whiptail --yesno "Setup multiple WIFI networks?" 20 60 ;then
-read -p "Enter PSK for Fish: " PSK_FISH
+read -p "Enter PSK for CWG_A_HUB: " PSK_CWG_A_HUB
 read -p "Enter PSK for CWG_B_HUB: " PSK_CWG_B_HUB
 sudo tee /etc/wpa_supplicant/wpa_supplicant.conf << END
 country=GB
@@ -193,9 +218,9 @@ ap_scan=1
 
 update_config=1
 network={
-    id_str="Fish"
-    ssid="Fish"
-    psk=${PSK_FISH}
+    id_str="CWG_A_HUB"
+    ssid="CWG_A_HUB"
+    psk=${PSK_CWG_A_HUB}
 }
 
 network={
