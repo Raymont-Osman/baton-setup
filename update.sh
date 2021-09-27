@@ -4,9 +4,8 @@
 #==================================
 cd /home/pi/Baton
 sudo supervisorctl stop baton
-cd /home/pi/Baton
 git pull
-# git checkout v1.x
-git checkout 90b6777
+git checkout v1.x
 sudo pip3 install -r requirements.txt 
 sudo supervisorctl start baton
+sudo supervisorctl tail baton
